@@ -40,7 +40,7 @@ bool scalaCheck(carta* mano, int len, bool* colore){
     int contoSeme = 1;
     char semeAsso = ' ';
     for(int i = 1; i < len; i++){
-        if (mano[i - 1].numero == mano[i].numero - 1){
+        if (mano[i].numero == mano[i -1].numero - 1){
             conto++;
             if(mano[i - 1].seme == mano[i].seme){
                 contoSeme++;
@@ -97,7 +97,7 @@ bool flushCheck(carta* mano, int len, const char* semi){
 //per mischiare, scambia index di mazzo per 200 volte
 void shuffle_mazzo(carta* mazzo, int len){
     
-    const int NUM_SHUFFLE = 200;
+    const int NUM_SHUFFLE = 400;
     for (int i = 0; i < NUM_SHUFFLE; i++)
     {
         int index1 = get_random_card(0, 51);
@@ -129,6 +129,77 @@ carta* get_hand(carta* mazzo, int num){
 //[0, 1, 2, 2 , 3]
 //[ , ]
 
+//comb[1]: coppia, comb[2]: doppiacoppia, comb[3]: tris, 
+// comb[4]: scala, comb[5]: colore, comb[6]: full, comb[7]: poker, comb[8]: scalacolore
+void handCheck(carta* mano, int num, int* comb){
+    int occ[13];
+    bool tris = false;
+    int coppie = 0;
+    bool quads = false;
+    for(int i = 0; i < 13; i++){
+        occ[i] = 0;
+    }
+    
+    for(int i = 0; i < num; i++){
+        occ[mano[i].numero - 2]++;
+    }
+    for(int i = 0; i < 13; i++){
+
+        
+        if(occ[i] == 4){
+            quads = true;
+        }
+        else if(occ[i] == 3){
+            tris = true;
+        } 
+        else if(occ[i] == 2){
+            coppie++;
+        }
+    }
+    bool scalaColore = false;
+    bool scala = scalaCheck(mano, 7, &scalaColore);
+    const char semi[4] = {'c', 'd', 'p', 'f'};
+    bool colore = flushCheck(mano, 7, semi);
+    std::cout<<"Scala:" <<scala<<" scalaColore: " <<scalaColore<<std::endl;
+    if(scalaColore && scala){
+        comb[8]++;
+        return;
+    }
+    if(quads){
+        comb[7]++;
+        return;
+    }
+    if(tris && coppie>= 2){
+        comb[6]++;
+        return;
+    }
+    if(colore){
+        comb[5]++;
+        return;
+    }
+    if(scala){
+        comb[4]++;
+        return;
+    }
+    if(tris){
+        comb[3]++;
+        return;
+    }
+    if(coppie >= 2){
+        comb[2]++;
+        return;
+    }
+    if(coppie == 1){
+        comb[1]++;
+        return;
+    }
+    comb[0]++;
+    return;
+
+
+}
+
+
 
 
 int main(){
@@ -144,21 +215,23 @@ int main(){
             count++;
         }
     }
-    
-   
-    shuffle_mazzo(mazzo, 52);
-    stampa_mazzo(mazzo, 52);
-    carta* mano1  =get_hand(mazzo, 7);
-    stampa_mazzo(mano1, 7);
-    std::sort(mano1, mano1 + 7, compareCarta);
-    stampa_mazzo(mano1, 7);
-    bool colore = false;
-    std::cout<<scalaCheck(mazzo, 7, &colore);
-    if(colore){
-        std::cout<<"colore!";
-    }
-    std::cout<<std::endl;
+    int comb[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+    for(int j = 0; j < 1000; j++){
+        shuffle_mazzo(mazzo, 52);
+        carta* mano1  =get_hand(mazzo, 7);
+        stampa_mazzo(mano1, 7);
+        std::sort(mano1, mano1 + 7, compareCarta);
+        stampa_mazzo(mano1, 7);
+        
+        handCheck(mano1, 7, comb);
 
-    std::cout<<flushCheck(mazzo, 7, semi)<<std::endl;
+        std::cout<<"stampa comb"<<std::endl;
+
+        for(int i = 8; i >= 0; i--){
+            std::cout<<comb[i]<<std::endl;
+        }
+
+    }
     return 0;
+    
 }
