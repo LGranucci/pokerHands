@@ -160,7 +160,7 @@ void handCheck(carta* mano, int num, int* comb){
     bool scala = scalaCheck(mano, 7, &scalaColore);
     const char semi[4] = {'c', 'd', 'p', 'f'};
     bool colore = flushCheck(mano, 7, semi);
-    std::cout<<"Scala:" <<scala<<" scalaColore: " <<scalaColore<<std::endl;
+    //std::cout<<"Scala:" <<scala<<" scalaColore: " <<scalaColore<<std::endl;
     if(scalaColore && scala){
         comb[8]++;
         return;
@@ -216,21 +216,31 @@ int main(){
         }
     }
     int comb[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-    for(int j = 0; j < 1000; j++){
+    const int NUM_ATT = 500;
+    for(int j = 0; j < NUM_ATT; j++){
         shuffle_mazzo(mazzo, 52);
         carta* mano1  =get_hand(mazzo, 7);
         stampa_mazzo(mano1, 7);
         std::sort(mano1, mano1 + 7, compareCarta);
-        stampa_mazzo(mano1, 7);
+        //stampa_mazzo(mano1, 7);
         
         handCheck(mano1, 7, comb);
 
-        std::cout<<"stampa comb"<<std::endl;
+       
+    }
+     std::cout<<"stampa comb"<<std::endl;
 
         for(int i = 8; i >= 0; i--){
             std::cout<<comb[i]<<std::endl;
         }
 
+    double odds[9];
+    std::cout<<"-----------------------------"<<std::endl;
+    std::cout<<"stampa odds"<<std::endl;
+    std::cout<<"-----------------------------"<<std::endl;
+    for (int i = 8; i >= 0; i--){
+        odds[i] = (comb[i] * 100)/ NUM_ATT;
+        std::cout<<odds[i]<< "%"<<std::endl;
     }
     return 0;
     
